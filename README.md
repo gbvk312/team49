@@ -99,7 +99,11 @@ team49/
 │           ├── FeatureCloud.tsx
 │           └── DetailPanel.tsx
 ├── scripts/
-│   └── seed_demo.py                  # Uploads a small sample corpus and verifies POST /ask
+│   ├── deploy_aws.sh                 # One-click deployment script
+│   ├── seed_demo.py                  # Uploads a small sample corpus and verifies POST /ask
+│   └── stream_hf_marked_to_s3.py     # Stream Hugging Face 3GPP markdown to S3
+├── tools/
+│   └── hf_tree_curl_download.py      # Download Hugging Face directory tree
 └── AGENTS.md
 ```
 
@@ -238,6 +242,15 @@ seconds. With `--api-url` provided, the script also sends a sample
 question to `POST /ask` once ingestion has had time to run and prints the
 agent response.
 
+### Additional data ingestion
+
+For larger-scale 3GPP specification ingestion from Hugging Face:
+
+```bash
+uv run tools/hf_tree_curl_download.py --repo gsma/3gpp-marked --output-dir ./data
+uv run scripts/stream_hf_marked_to_s3.py --input-dir ./data --bucket <RawBucketName>
+```
+
 ## Run the frontend locally
 
 ```bash
@@ -291,6 +304,7 @@ correlate a failing ingestion run with the originating S3 object.
 
 | Task                                    | Command                                            |
 | --------------------------------------- | -------------------------------------------------- |
+| One-click deploy                        | `./scripts/deploy_aws.sh`                          |
 | Synth CloudFormation                    | `cd infra && cdk synth`                            |
 | Diff a stack                            | `cdk diff Team49PipelineStack`                     |
 | Tail Step Functions executions          | `aws stepfunctions list-executions ...`            |

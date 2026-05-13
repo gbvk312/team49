@@ -145,6 +145,9 @@ class KnowledgeStack(Stack):
         )
         index_resource.node.add_dependency(self.collection)
         index_resource.node.add_dependency(access_policy)
+        # Ensure Lambda IAM policy is ready before invoking
+        if index_creator.role and index_creator.role.node.try_find_child("DefaultPolicy"):
+            index_resource.node.add_dependency(index_creator.role.node.find_child("DefaultPolicy"))
 
         self.knowledge_base = bedrock.CfnKnowledgeBase(
             self,
@@ -236,7 +239,14 @@ def create_index(endpoint, index_name, props):
             }
         },
     }
-    request("PUT", f"{endpoint}/{index_name}", mapping, ignore_statuses={200, 201, 400})
+    # Retry on 403 — AOSS data access policy propagation can take up to 60s
+    for attempt in range(12):
+        result = request("PUT", f"{endpoint}/{index_name}", mapping, ignore_statuses={200, 201, 400, 403})
+        if result["status"] != 403:
+            break
+        time.sleep(10)
+    else:
+        raise PermissionError(f"Still getting 403 after retries creating index {index_name}")
     for _ in range(30):
         result = request("GET", f"{endpoint}/{index_name}", None, ignore_statuses={200, 404})
         if result["status"] == 200:
