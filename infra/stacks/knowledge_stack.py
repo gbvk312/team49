@@ -204,7 +204,6 @@ from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
 
 session = boto3.Session()
-credentials = session.get_credentials()
 region = session.region_name or "us-east-1"
 
 
@@ -239,8 +238,9 @@ def create_index(endpoint, index_name, props):
             }
         },
     }
-    # Retry on 403 — AOSS data access policy propagation can take up to 60s
-    for attempt in range(12):
+    # AOSS data access policy propagation can take up to 3–5 minutes
+    time.sleep(60)
+    for attempt in range(24):
         result = request("PUT", f"{endpoint}/{index_name}", mapping, ignore_statuses={200, 201, 400, 403})
         if result["status"] != 403:
             break
@@ -261,8 +261,9 @@ def delete_index(endpoint, index_name):
 
 def request(method, url, payload, ignore_statuses):
     body = json.dumps(payload).encode("utf-8") if payload is not None else b""
+    creds = session.get_credentials().get_frozen_credentials()
     aws_request = AWSRequest(method=method, url=url, data=body, headers={"Content-Type": "application/json"})
-    SigV4Auth(credentials, "aoss", region).add_auth(aws_request)
+    SigV4Auth(creds, "aoss", region).add_auth(aws_request)
     http_request = urllib.request.Request(url, data=body or None, headers=dict(aws_request.headers), method=method)
     try:
         with urllib.request.urlopen(http_request, timeout=30) as response:
