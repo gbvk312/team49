@@ -1,0 +1,28 @@
+{
+  "openapi": "3.0.0",
+  "info": { "title": "Whitepaper Lookup", "version": "1.0.0" },
+  "paths": {
+    "/whitepaper-lookup": {
+      "post": {
+        "operationId": "whitepaper_lookup",
+        "description": "Find explanatory telecom whitepaper content related to a 3GPP spec or feature.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "spec_or_feature": { "type": "string", "description": "Spec, feature, technology, or deployment topic." },
+                  "top_k": { "type": "integer", "description": "Maximum number of whitepaper chunks to return." }
+                },
+                "required": ["spec_or_feature"]
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Whitepaper chunks with source metadata." } }
+      }
+    }
+  }
+}

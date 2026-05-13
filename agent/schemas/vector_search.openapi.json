@@ -1,0 +1,29 @@
+{
+  "openapi": "3.0.0",
+  "info": { "title": "Vector Search", "version": "1.0.0" },
+  "paths": {
+    "/vector-search": {
+      "post": {
+        "operationId": "vector_search",
+        "description": "Search 3GPP and whitepaper chunks semantically using the Bedrock Knowledge Base.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": { "type": "string", "description": "Natural-language search query." },
+                  "top_k": { "type": "integer", "description": "Maximum number of chunks to return." },
+                  "filters": { "type": "object", "description": "Optional metadata filters such as spec, release, feature, source_type." }
+                },
+                "required": ["query"]
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Search results with metadata and citations." } }
+      }
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "openapi": "3.0.0",
+  "info": { "title": "Graph Search", "version": "1.0.0" },
+  "paths": {
+    "/graph-search": {
+      "post": {
+        "operationId": "graph_search",
+        "description": "Expand a feature, spec, release, or whitepaper node in the Neptune relationship graph.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "start_node": { "type": "string", "description": "Graph node ID to expand." },
+                  "edge_types": { "type": "array", "items": { "type": "string" }, "description": "Optional edge type allow-list." },
+                  "depth": { "type": "integer", "description": "Traversal depth, capped at 3." }
+                },
+                "required": ["start_node"]
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Cytoscape-compatible nodes and edges." } }
+      }
+    }
+  }
+}

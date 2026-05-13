@@ -1,0 +1,8 @@
+{
+  "app": "python app.py",
+  "context": {
+    "app_name": "team49-3gpp",
+    "foundation_model": "anthropic.claude-3-5-sonnet-20240620-v1:0",
+    "embedding_model": "amazon.titan-embed-text-v2:0"
+  }
+}

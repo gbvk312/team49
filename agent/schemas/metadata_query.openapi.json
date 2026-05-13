@@ -1,0 +1,30 @@
+{
+  "openapi": "3.0.0",
+  "info": { "title": "Metadata Query", "version": "1.0.0" },
+  "paths": {
+    "/metadata-query": {
+      "post": {
+        "operationId": "metadata_query",
+        "description": "Query DynamoDB metadata by spec, release, section, feature, or vendor.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "spec": { "type": "string", "description": "3GPP spec such as TS 38.331." },
+                  "release": { "type": "string", "description": "Release such as Rel-18." },
+                  "section": { "type": "string", "description": "Section or subsection number." },
+                  "feature": { "type": "string", "description": "Feature name." },
+                  "vendor": { "type": "string", "description": "Whitepaper vendor such as Nokia." }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Matching metadata rows." } }
+      }
+    }
+  }
+}
