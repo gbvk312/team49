@@ -81,7 +81,7 @@ class PipelineStack(Stack):
         chunks_bucket.grant_read(metadata_extractor)
         chunks_bucket.grant_read_write(metadata_extractor)
         chunks_bucket.grant_read_write(semantic_chunker)
-        chunks_bucket.grant_read(relationship_extractor)
+        chunks_bucket.grant_read_write(relationship_extractor)
         chunks_table.grant_write_data(metadata_writer)
         features_table.grant_write_data(metadata_writer)
 
@@ -101,7 +101,7 @@ class PipelineStack(Stack):
         graph_write_task = self.with_lambda_retry(tasks.LambdaInvoke(self, "WriteGraph", lambda_function=neptune_writer, output_path="$.Payload"))
         kb_sync_task = self.with_lambda_retry(tasks.LambdaInvoke(self, "StartKnowledgeBaseIngestion", lambda_function=kb_sync, output_path="$.Payload"))
 
-        fanout = sfn.Parallel(self, "PersistKnowledgeArtifacts")
+        fanout = sfn.Parallel(self, "PersistKnowledgeArtifacts", result_path="$.parallel_results")
         fanout.branch(metadata_write_task)
         fanout.branch(relationships_task.next(graph_write_task))
 
