@@ -130,6 +130,25 @@ fi
 echo "==> cdk deploy --all (CloudFormation stacks)"
 # shellcheck disable=SC2086
 eval "${CDK_BIN} deploy --all --require-approval never" "${CDK_CONTEXT[@]}" ${CDK_EXTRA_ARGS:-}
+DEPLOY_RC=$?
+
+# If KnowledgeStack failed (likely missing vector index on first deploy), create the index and retry
+if [[ "${DEPLOY_RC}" -ne 0 ]]; then
+  echo ""
+  echo "==> First deploy had failures. Attempting to create vector index and retry..."
+  ENDPOINT=$(aws cloudformation describe-stacks --stack-name Team49KnowledgeStack --region "${REGION}" \
+    --query 'Stacks[0].Outputs[?OutputKey==`CollectionEndpoint`].OutputValue' --output text 2>/dev/null || true)
+  if [[ -n "${ENDPOINT}" && "${ENDPOINT}" != "None" ]]; then
+    echo "    Creating vector index on ${ENDPOINT}"
+    python "${ROOT}/scripts/create_vector_index.py" --endpoint "${ENDPOINT}" --region "${REGION}"
+    echo "    Retrying cdk deploy..."
+    # shellcheck disable=SC2086
+    eval "${CDK_BIN} deploy --all --require-approval never" "${CDK_CONTEXT[@]}" ${CDK_EXTRA_ARGS:-}
+  else
+    echo "    Could not find CollectionEndpoint output. Manual intervention needed."
+    exit 1
+  fi
+fi
 
 echo ""
 echo "==> Useful outputs (AWS CLI: CloudFormation describe-stacks)"
