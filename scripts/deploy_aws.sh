@@ -64,7 +64,7 @@ echo "==> Python venv and CDK app dependencies (${INFRA})"
 cd "${INFRA}"
 if command -v uv >/dev/null 2>&1; then
   UV_PY="${DEPLOY_UV_PYTHON:-3.12}"
-  uv venv --python "${UV_PY}" .venv
+  uv venv --python "${UV_PY}" --allow-existing .venv
   if [[ -f .venv/Scripts/activate ]]; then
     # shellcheck source=/dev/null
     source .venv/Scripts/activate
